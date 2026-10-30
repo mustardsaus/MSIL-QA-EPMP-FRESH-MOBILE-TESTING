@@ -71,8 +71,8 @@ export function DependenciesPage() {
       </section>
 
       <Card flush>
-        <div className="overflow-x-auto">
-          <table className="w-full text-[12px]">
+        <div className="overflow-x-auto m-tbl-wrap">
+          <table className="w-full text-[12px] m-tbl">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[#dce8fb] text-left text-[11px] font-medium text-[#344054]">
                 <th className="px-4 py-3 min-w-[260px]">Dependent activity</th>

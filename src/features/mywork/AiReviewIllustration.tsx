@@ -241,8 +241,8 @@ export function AiReviewIllustration({ open, onClose, role }: Props) {
           </p>
         )}
 
-        <div className="overflow-x-auto rounded-lg border border-[var(--color-border)]">
-          <table className="w-full border-collapse text-[11px]">
+        <div className="overflow-x-auto rounded-lg border border-[var(--color-border)] m-tbl-wrap">
+          <table className="w-full border-collapse text-[11px] m-tbl">
             <thead>
               <tr className="bg-[var(--color-surface)] text-left text-[10.5px] uppercase tracking-wide text-[var(--color-muted)]">
                 <th className="px-2 py-2 font-semibold">Source text</th>
@@ -353,8 +353,8 @@ export function AiReviewIllustration({ open, onClose, role }: Props) {
             <p className="mb-2 text-[10.5px] text-[#7f1d1d]">
               These were found in the file but could not be applied. Nothing was changed for them and they will not be submitted.
             </p>
-            <div className="overflow-x-auto rounded-md border border-[#fecaca] bg-white">
-              <table className="w-full border-collapse text-[11px]">
+            <div className="overflow-x-auto rounded-md border border-[#fecaca] bg-white m-tbl-wrap">
+              <table className="w-full border-collapse text-[11px] m-tbl">
                 <thead>
                   <tr className="bg-[#fff5f5] text-left text-[10.5px] uppercase tracking-wide text-[#991b1b]">
                     <th className="px-2 py-1.5 font-semibold">Source text</th>

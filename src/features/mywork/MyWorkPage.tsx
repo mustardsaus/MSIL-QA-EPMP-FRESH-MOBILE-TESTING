@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Cell
 } from 'recharts'
-import { PageHeader, Card, Tabs, RygDot } from '../../components'
+import { PageHeader, Card, Tabs, RygDot, MobileFilters, BottomSheet, useMobilePage } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import {
@@ -252,6 +252,9 @@ export function MyWorkPage() {
     else { setSortKey(key); setSortDir('asc') }
   }
   const anyColFilter = Object.values(colFilters).some(Boolean)
+  // Mobile: the detail table becomes paginated record cards (sort + column filters in a sheet); desktop unchanged.
+  const tPg = useMobilePage(tableRows, 10, 'rows')
+  const [colSheet, setColSheet] = useState(false)
 
   // Worklist (card) data.
   const counts = useMemo(() => countWork(instances, currentPersona), [instances, currentPersona])
@@ -294,7 +297,11 @@ export function MyWorkPage() {
       />
 
       {/* Filters — the client's set */}
-      <section className="epmp-card mb-4 px-4 py-3.5">
+      <section className="epmp-card mb-4 px-4 py-3.5 max-[860px]:py-3">
+        <MobileFilters
+          count={[fModel, fDept, fMilestone, fPic, fVendorCode, fVendor].filter((v) => v !== 'All').length + (fPart ? 1 : 0) + (fPartCode ? 1 : 0)}
+          onClear={clearFilters}
+        >
         <div className="grid grid-cols-2 gap-2.5 md:grid-cols-4 xl:grid-cols-8">
           <label className="block"><span className="mb-1 block text-[10px] font-semibold text-[var(--color-muted)]">Model</span>
             <select value={fModel} onChange={(e) => setFModel(e.target.value)} className={filterCls}><option value="All">All</option>{modelOptions.map((m) => <option key={m} value={m}>{m}</option>)}</select></label>
@@ -318,6 +325,7 @@ export function MyWorkPage() {
             <button onClick={clearFilters} className="text-[11px] font-medium text-[var(--color-primary)] hover:underline">Clear all filters</button>
           </div>
         )}
+        </MobileFilters>
       </section>
 
       {view === 'workspace' ? (
@@ -393,6 +401,72 @@ export function MyWorkPage() {
                 )}
               </div>
             </div>
+            {tPg.mobile ? (
+              <div className="px-3 pb-3 pt-3">
+                <div className="mb-3 flex items-center gap-2">
+                  <select value={sortKey} onChange={(e) => { setSortKey(e.target.value as TableColKey); setSortDir('asc') }} aria-label="Sort by"
+                    className={`${filterCls} min-w-0 flex-1`}>
+                    {TABLE_COLS.map((c) => <option key={c.key} value={c.key}>Sort: {c.label}</option>)}
+                  </select>
+                  <button type="button" onClick={() => setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))} aria-label={`Sort direction: ${sortDir === 'asc' ? 'ascending' : 'descending'}`}
+                    className="flex h-10 w-10 flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-white text-[13px] text-[var(--color-accent)]">{sortDir === 'asc' ? '▲' : '▼'}</button>
+                  <button type="button" onClick={() => setColSheet(true)}
+                    className="inline-flex h-10 flex-none items-center gap-1.5 rounded-[10px] border border-[var(--color-border)] bg-white px-3 text-[13px] font-semibold text-[var(--color-text)]">
+                    Column filters{anyColFilter && <span className="rounded-full bg-[var(--color-primary)] px-1.5 text-[11px] leading-[18px] text-white">{Object.values(colFilters).filter(Boolean).length}</span>}
+                  </button>
+                </div>
+                <BottomSheet open={colSheet} onClose={() => setColSheet(false)} title="Column filters"
+                  footer={<>
+                    <button type="button" className="m-sheet-btn" onClick={() => setColFilters({ status: '', partNo: '', partName: '', model: '', department: '', vendorName: '', milestoneId: '', activity: '', planned: '' })}>Clear all</button>
+                    <button type="button" className="m-sheet-btn primary" onClick={() => setColSheet(false)}>Show {tableRows.length} rows</button>
+                  </>}>
+                  <div className="m-filter-stack">
+                    {TABLE_COLS.map((c) => (
+                      <label key={c.key}><span className="font-semibold text-[var(--color-muted)]">{c.label}</span>
+                        <input value={colFilters[c.key]} onChange={(e) => setColFilters((prev) => ({ ...prev, [c.key]: e.target.value }))}
+                          placeholder="Filter" aria-label={`Filter ${c.label}`} className={filterCls} />
+                      </label>
+                    ))}
+                  </div>
+                </BottomSheet>
+                {tableRows.length === 0 ? (
+                  <p className="py-8 text-center text-[13px] text-[var(--color-muted)]">No parts in this selection.</p>
+                ) : (
+                  <ul className="m-cards flex flex-col gap-2.5">
+                    {tPg.rows.map((i) => {
+                      const b = workBucket(i)!
+                      return (
+                        <li key={`${i.row.id}-${i.part.partNo}`} className="rounded-xl border border-[var(--color-border)] bg-white p-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-mono text-[12px] text-[var(--color-ink-muted)]">{i.part.partNo}</p>
+                              <p className="text-[14px] font-semibold leading-5 text-[var(--color-text)]">{i.part.partName}</p>
+                            </div>
+                            <span className="inline-flex flex-none items-center gap-1.5 rounded-full px-2 py-0.5 text-[11px] font-medium"
+                              style={{ background: `${WORK_BUCKET_COLORS[b]}1a`, color: WORK_BUCKET_COLORS[b] }}>
+                              <span className="inline-block h-1.5 w-1.5 rounded-full" style={{ background: WORK_BUCKET_COLORS[b] }} />{b}
+                            </span>
+                          </div>
+                          <p className="mt-1.5 text-[13px] leading-5 text-[var(--color-text)]">{i.activity.name}</p>
+                          <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-[12px]">
+                            <div><dt className="text-[var(--color-muted)]">Model</dt><dd className="m-0">{i.part.model}</dd></div>
+                            <div><dt className="text-[var(--color-muted)]">Department</dt><dd className="m-0">{i.part.department || 'Other'}</dd></div>
+                            <div><dt className="text-[var(--color-muted)]">Vendor</dt><dd className="m-0">{i.part.vendorName}</dd></div>
+                            <div><dt className="text-[var(--color-muted)]">Milestone</dt><dd className="m-0"><span className="rounded bg-secondary px-1.5 py-0.5 text-[11px] font-medium text-primary">{i.row.milestoneId}</span></dd></div>
+                            <div className="col-span-2"><dt className="text-[var(--color-muted)]">Planned</dt><dd className="m-0">{plannedText(i)}</dd></div>
+                          </dl>
+                          <div className="mt-2.5 flex justify-end">
+                            <Link to={`/activities/${i.row.id}?part=${encodeURIComponent(i.part.partNo)}`}
+                              className="inline-flex h-9 items-center rounded-[10px] border border-[#bfdbfe] bg-[var(--color-secondary)] px-3 text-[13px] font-semibold text-[var(--color-accent)]">Open →</Link>
+                          </div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+                {tPg.pager}
+              </div>
+            ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -462,6 +536,7 @@ export function MyWorkPage() {
                 </tbody>
               </table>
             </div>
+            )}
           </Card>
         </>
       ) : (

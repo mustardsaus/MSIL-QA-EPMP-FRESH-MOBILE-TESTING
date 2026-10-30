@@ -124,7 +124,7 @@ export function ReleasePanel() {
 
   return (
     <section className="mb-4" aria-label="Part release status">
-      <div className="mb-2 flex items-baseline justify-between">
+      <div className="mb-2 flex items-baseline justify-between max-[860px]:flex-col max-[860px]:items-start max-[860px]:gap-0.5">
         <h2 className="text-[13px] font-semibold text-[var(--color-text)]">{isVendor ? 'Parts released to you' : 'Release to vendor'}</h2>
         <span className="text-[11px] text-[var(--color-muted)]">
           {isVendor
@@ -175,8 +175,8 @@ export function ReleasePanel() {
         {shown.length === 0 ? (
           <p className="px-4 py-5 text-center text-[12px] text-[var(--color-muted)]">No parts here.</p>
         ) : (
-          <div className="max-h-[260px] overflow-auto">
-            <table className="w-full text-[12px]">
+          <div className="max-h-[260px] overflow-auto m-tbl-wrap">
+            <table className="w-full text-[12px] m-tbl m-tbl2">
               <thead className="sticky top-0 bg-[var(--color-surface)]">
                 <tr className="border-b border-[var(--color-border)] text-left text-[var(--color-muted)]">
                   <th className="w-8 px-3 py-2">
@@ -223,7 +223,7 @@ export function ReleasePanel() {
                       <td className="px-3 py-2">
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATE_PILL[state].cls}`}>{STATE_PILL[state].label}</span>
                       </td>
-                      <td className="max-w-[360px] px-3 py-2 text-[11px] text-[var(--color-muted)]">
+                      <td className="m-wrap max-w-[360px] px-3 py-2 text-[11px] text-[var(--color-muted)] max-[860px]:min-w-[220px]">
                         {state === 'Returned' && ret
                           ? `Returned ${fmtDate(ret.at.slice(0, 10))}: “${ret.reason}”`
                           : state === 'Pending'

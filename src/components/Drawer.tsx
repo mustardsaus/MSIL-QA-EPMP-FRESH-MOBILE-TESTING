@@ -38,7 +38,7 @@ export function Drawer({
 
       {/* Panel */}
       <div
-        className={`fixed top-0 ${side === 'right' ? 'right-0' : 'left-0'} z-50 h-full ${width} bg-white shadow-2xl flex flex-col transition-transform duration-300 ${
+        className={`fixed top-0 ${side === 'right' ? 'right-0' : 'left-0'} z-50 h-full ${width} m-drawer max-w-full bg-white shadow-2xl flex flex-col transition-transform duration-300 ${
           open
             ? 'translate-x-0'
             : side === 'right'
@@ -53,7 +53,7 @@ export function Drawer({
             <h2 className="text-base font-semibold text-[var(--color-text)]">{title}</h2>
             <button
               onClick={onClose}
-              className="text-[var(--color-muted)] hover:text-[var(--color-text)] rounded p-1 focus:outline-none"
+              className="text-[var(--color-muted)] hover:text-[var(--color-text)] rounded p-1 focus:outline-none max-[860px]:flex max-[860px]:h-9 max-[860px]:w-9 max-[860px]:items-center max-[860px]:justify-center"
               aria-label="Close"
             >
               ✕

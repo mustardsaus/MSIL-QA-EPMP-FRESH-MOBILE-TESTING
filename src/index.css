@@ -166,3 +166,106 @@ input:focus-visible, select:focus-visible, textarea:focus-visible {
   border-right: 2px solid #cbd5e1;
   border-bottom: 2px solid #cbd5e1;
 }
+
+/* ═══ Mobile layer (≤ 860px) ═════════════════════════════════════════════════
+   Ported from the MSIL Activity Dashboards' mobile layer (same breakpoint and patterns):
+   compact header + slide-in nav drawer, filters in a bottom sheet, tables that scroll sideways
+   with a frozen first column and a fold shadow, pagination instead of very long tables,
+   modals as bottom sheets, drawers full-width. Colours, fonts and components keep this app's
+   own EPMP look. Nothing below applies above 860px, so desktop is unchanged. */
+.m-sheet-scrim, .m-sheet, .m-only { display: none; }
+@media (max-width: 860px) {
+  .m-hide { display: none !important; }
+  .m-only { display: revert; }
+
+  /* ── Readable minimum text on phones (the desktop UI is 9–11px dense) ── */
+  .text-\[9px\], .text-\[10px\] { font-size: 11px !important; line-height: 1.45 !important; }
+  .text-\[11px\], .text-xs { font-size: 12px !important; }
+  .sb-group-label { font-size: 11px; }
+  .sb-item { font-size: 14px; min-height: 44px; }
+
+  /* ── Touch-friendly form controls; 16px stops iOS zooming into a focused field ── */
+  select, input[type="text"], input[type="search"], input[type="date"], input[type="number"], input[type="email"], textarea {
+    min-height: 40px; font-size: 16px !important;
+  }
+  td select, td input[type="text"], td input[type="date"], td input[type="number"], th select {
+    min-height: 34px; font-size: 14px !important;
+  }
+  input[type="checkbox"], input[type="radio"] { width: 18px; height: 18px; }
+
+  /* ── Tables: sideways scroll, frozen first column with fold shadow ── */
+  .m-tbl-wrap { overflow-x: auto !important; -webkit-overflow-scrolling: touch; max-width: 100%; }
+  table.m-tbl { min-width: max(100%, var(--m-minw, 620px)); border-collapse: separate; border-spacing: 0; }
+  table.m-tbl th, table.m-tbl td { white-space: nowrap; }
+  table.m-tbl > tbody > tr > :first-child, table.m-tbl2 > tbody > tr > :nth-child(2), table.m-tbl td.m-wrap { white-space: normal; }
+  table.m-tbl > * > tr > :first-child,
+  table.m-tbl2 > * > tr > :nth-child(2) {
+    position: sticky; left: 0; z-index: 2; background-color: #fff;
+  }
+  table.m-tbl > * > tr > :first-child { min-width: 140px; max-width: 200px; }
+  table.m-tbl > thead > tr > :first-child,
+  table.m-tbl2 > thead > tr > :nth-child(2) { background-color: var(--color-table-head); z-index: 3; }
+  table.m-tbl:not(.m-tbl2) > * > tr > :first-child::after,
+  table.m-tbl2 > * > tr > :nth-child(2)::after {
+    content: ""; position: absolute; top: 0; bottom: 0; right: -8px; width: 8px; pointer-events: none;
+    background: linear-gradient(to right, rgba(16, 24, 40, .07), rgba(16, 24, 40, 0));
+  }
+  /* identifier in the 2nd column: column 1 scrolls away, column 2 stays */
+  table.m-key2 > * > tr > :first-child { position: static; min-width: 0; max-width: none; white-space: nowrap; }
+  table.m-key2 > * > tr > :first-child::after { display: none; }
+  table.m-key2 > * > tr > :nth-child(2) { position: sticky; left: 0; z-index: 2; background-color: #fff; min-width: 190px; max-width: 230px; white-space: normal; }
+  table.m-key2 > thead > tr > :nth-child(2) { background-color: var(--color-table-head); z-index: 3; }
+  table.m-key2 > * > tr > :nth-child(2)::after {
+    content: ""; position: absolute; top: 0; bottom: 0; right: -8px; width: 8px; pointer-events: none;
+    background: linear-gradient(to right, rgba(16, 24, 40, .07), rgba(16, 24, 40, 0));
+  }
+  /* two frozen columns: a 40px selection column + the identifier */
+  table.m-tbl2 > * > tr > :first-child { min-width: 40px; width: 40px; max-width: 40px; }
+  table.m-tbl2 > * > tr > :nth-child(2) { left: 40px; min-width: 140px; max-width: 200px; }
+  table.m-tbl tbody tr:hover > td { background-color: var(--color-surface); }
+  table.m-tbl td, table.m-tbl th { padding-top: 10px; padding-bottom: 10px; }
+
+  /* ── Modals become bottom sheets ── */
+  .m-modal-overlay { align-items: flex-end !important; padding: 0 !important; }
+  .m-modal {
+    max-width: 100% !important; width: 100% !important; max-height: 92vh !important;
+    border-radius: 20px 20px 0 0 !important; padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .m-modal-foot { flex-wrap: wrap; }
+  .m-modal-foot > * { flex: 1 1 auto; justify-content: center; min-height: 40px; }
+
+  /* ── Side drawers: full width ── */
+  .m-drawer { width: 100% !important; max-width: 100% !important; }
+
+  /* ── Tab strips: one scrolling row, never wrapping ── */
+  [role="tablist"] { flex-wrap: nowrap !important; overflow-x: auto; scrollbar-width: none; width: 100% !important; }
+  [role="tablist"]::-webkit-scrollbar { display: none; }
+  [role="tablist"] > button { flex: 0 0 auto; font-size: 13px; }
+
+  /* ── Bottom sheet (filters, panels) ── */
+  .m-sheet-scrim {
+    display: block; position: fixed; inset: 0; z-index: 180; background: rgba(2, 6, 23, .35);
+    opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .m-sheet-scrim.open { opacity: 1; pointer-events: auto; }
+  .m-sheet {
+    display: flex; flex-direction: column; position: fixed; left: 0; right: 0; bottom: 0; z-index: 190;
+    max-height: 85vh; background: #fff; border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 40px rgba(2, 6, 23, .18); padding-bottom: env(safe-area-inset-bottom, 0px);
+    transform: translateY(100%); transition: transform .22s ease; visibility: hidden;
+  }
+  .m-sheet.open { transform: translateY(0); visibility: visible; }
+  .m-sheet-handle { width: 40px; height: 4px; border-radius: 2px; background: #d1d5db; margin: 10px auto 0; flex: none; }
+  .m-sheet-head { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 8px; flex: none; }
+  .m-sheet-head h3 { margin: 0; font-size: 16px; font-weight: 600; color: var(--color-text); }
+  .m-sheet-close { border: 0; background: none; color: var(--color-muted); font-size: 18px; width: 36px; height: 36px; border-radius: 8px; }
+  .m-sheet-body { flex: 1; overflow-y: auto; padding: 4px 16px 12px; -webkit-overflow-scrolling: touch; }
+  .m-sheet-foot { display: flex; gap: 8px; padding: 10px 16px 14px; border-top: 1px solid var(--color-border); flex: none; }
+  .m-sheet-btn { flex: 1; height: 42px; border-radius: 10px; border: 1px solid var(--color-border); background: #fff; font-size: 14px; font-weight: 600; color: var(--color-text); }
+  .m-sheet-btn.primary { background: var(--color-primary); border-color: var(--color-primary); color: #fff; }
+  /* filter controls inside the sheet: one per row, full width */
+  .m-filter-stack, .m-filter-stack > div, .m-filter-stack > span { display: flex !important; flex-direction: column !important; align-items: stretch !important; gap: 12px !important; width: 100%; margin: 0 !important; }
+  .m-filter-stack label { display: flex; flex-direction: column; align-items: stretch; gap: 4px; width: 100%; font-size: 12px; }
+  .m-filter-stack label:has(> input[type="checkbox"]) { flex-direction: row; align-items: center; gap: 8px; font-size: 14px; }
+  .m-filter-stack select, .m-filter-stack input[type="text"], .m-filter-stack input[type="search"], .m-filter-stack input[type="date"] { width: 100% !important; max-width: none !important; }
+}

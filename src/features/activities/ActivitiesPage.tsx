@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore, getPersonaScope } from '../../store/personaStore'
-import { Button, Card, RygDot, PageHeader } from '../../components'
+import { Button, Card, RygDot, PageHeader, MobileFilters, useMobilePage } from '../../components'
 import type { ActivityDefinition, TemplateRow } from '../../domain'
 import type { RygStatus } from '../../components/RygDot'
 import { getFilteredData } from '../../engine'
@@ -123,6 +123,8 @@ export function ActivitiesPage() {
   }
 
   const hasFilters = search !== '' || milestoneFilter !== 'All' || sectionFilter !== 'All'
+  const pg = useMobilePage(filtered, 10, 'activities')
+  const libPg = useMobilePage(libraryActivities, 10, 'activities')
   const scopeNote = scope.section
     ? `Showing section ${scope.section} only.`
     : scope.vendor
@@ -150,14 +152,19 @@ export function ActivitiesPage() {
 
       {/* Filters — EPMP filter card */}
       <section className="epmp-card mb-4 flex flex-wrap items-center gap-3 px-4 py-3.5">
+        <MobileFilters
+          count={(milestoneFilter !== 'All' ? 1 : 0) + (sectionFilter !== 'All' ? 1 : 0)}
+          onClear={() => { setMilestoneFilter('All'); setSectionFilter('All') }}
+          inline={
         <input
           type="text"
           placeholder="Search activities…"
           aria-label="Search activities"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="h-9 w-64 max-w-full rounded-lg border border-[var(--color-border)] bg-[#f9fafb] px-3 text-[11px] text-[#344054] placeholder-[var(--color-muted)]"
-        />
+          className="h-9 w-64 max-w-full rounded-lg border border-[var(--color-border)] bg-[#f9fafb] px-3 text-[11px] text-[#344054] placeholder-[var(--color-muted)] max-[860px]:w-full"
+        />}
+        >
         <select
           value={milestoneFilter}
           onChange={(e) => setMilestoneFilter(e.target.value)}
@@ -190,6 +197,7 @@ export function ActivitiesPage() {
             Clear filters
           </button>
         )}
+        </MobileFilters>
       </section>
 
       {/* Instances table */}
@@ -205,8 +213,8 @@ export function ActivitiesPage() {
             )}
           </div>
         ) : (
-          <div className="overflow-x-auto" data-tour="activity-list">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto m-tbl-wrap" data-tour="activity-list">
+            <table className="w-full text-sm m-tbl">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                   <th className="text-left px-4 py-3 font-medium text-[var(--color-muted)]">Activity</th>
@@ -219,7 +227,7 @@ export function ActivitiesPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((s, i) => {
+                {pg.rows.map((s, i) => {
                   const active = s.partCount - s.notApplicable
                   const pct = active > 0 ? Math.round((s.approved / active) * 100) : 0
                   return (
@@ -274,6 +282,7 @@ export function ActivitiesPage() {
             </table>
           </div>
         )}
+        {pg.pager && <div className="px-4 pb-3">{pg.pager}</div>}
       </Card>
 
       {/* Admin: activity library (definitions, no dates) */}
@@ -283,8 +292,8 @@ export function ActivitiesPage() {
             Activity library ({libraryActivities.length})
           </h2>
           <Card flush>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className="text-left px-4 py-3 font-medium text-[var(--color-muted)]">Activity</th>
@@ -297,7 +306,7 @@ export function ActivitiesPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {libraryActivities.map((act) => {
+                  {libPg.rows.map((act) => {
                     const uses = templateRows.filter((r) => r.activityId === act.id).length
                     return (
                       <tr key={act.id} className="border-b border-[var(--color-border)]">
@@ -344,6 +353,7 @@ export function ActivitiesPage() {
                 </tbody>
               </table>
             </div>
+            {libPg.pager && <div className="px-4 pb-3">{libPg.pager}</div>}
           </Card>
         </div>
       )}

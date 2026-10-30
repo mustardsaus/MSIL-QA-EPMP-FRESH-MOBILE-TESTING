@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Card, Button, Modal } from '../../components'
+import { PageHeader, Card, Button, Modal, useMobilePage, MobileFilters } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import type { ActivityDefinition, PartRecord, TemplateRow } from '../../domain'
@@ -147,6 +147,7 @@ export function ApplicabilityMatrixPage() {
   const readOnly = !canMark && !canReverse
   const totalNa = savedNa.size
 
+  const pgParts = useMobilePage(visibleParts, 10, 'parts')
   return (
     <div>
       <PageHeader
@@ -156,14 +157,19 @@ export function ApplicabilityMatrixPage() {
       />
 
       <section className="epmp-card mb-4 flex flex-wrap items-center gap-3 px-4 py-3.5">
+        <MobileFilters
+          count={[modelFilter, vendorFilter, milestoneFilter].filter((v) => v !== 'All').length}
+          onClear={() => { setModelFilter('All'); setVendorFilter('All'); setMilestoneFilter('All') }}
+          inline={
         <input
           type="text"
           placeholder="Search part…"
           aria-label="Search parts"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className={`${inputCls} w-56 max-w-full`}
-        />
+          className={`${inputCls} w-56 max-w-full max-[860px]:w-full`}
+        />}
+        >
         <select aria-label="Model" value={modelFilter} onChange={(e) => setModelFilter(e.target.value)} className={inputCls}>
           <option value="All">All models</option>
           {models.map((m) => <option key={m} value={m}>{m}</option>)}
@@ -189,6 +195,7 @@ export function ApplicabilityMatrixPage() {
             Clear filters
           </button>
         )}
+        </MobileFilters>
         <span className="ml-auto text-[11px] text-[var(--color-muted)]">
           {allColumns.length} eligible {allColumns.length === 1 ? 'activity' : 'activities'} · {visibleParts.length} of {parts.length} parts · {totalNa} marked Not applicable
         </span>
@@ -229,8 +236,8 @@ export function ApplicabilityMatrixPage() {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto m-tbl-wrap">
+            <table className="w-full text-sm m-tbl">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                   <th className={`${thCls} min-w-[220px]`}>Part</th>
@@ -260,7 +267,7 @@ export function ApplicabilityMatrixPage() {
                 </tr>
               </thead>
               <tbody>
-                {visibleParts.map((p) => {
+                {pgParts.rows.map((p) => {
                   const keys = rowKeys(p)
                   const editable = keys.filter(isEditable)
                   return (
@@ -312,6 +319,7 @@ export function ApplicabilityMatrixPage() {
                 )}
               </tbody>
             </table>
+            {pgParts.pager && <div className="sticky left-0 px-4 pb-3">{pgParts.pager}</div>}
           </div>
         )}
       </Card>

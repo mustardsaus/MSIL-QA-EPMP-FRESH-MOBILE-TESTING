@@ -215,8 +215,8 @@ export function LessonsPage() {
         <Card className="mb-6"><p className="py-6 text-center text-sm text-[var(--color-muted)]">No at-risk open activities projected for this selection.</p></Card>
       ) : (
         <Card flush className="mb-6">
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+          <div className="overflow-x-auto m-tbl-wrap">
+            <table className="w-full text-[12px] m-tbl m-key2">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)] text-left text-[10px] font-semibold uppercase tracking-wide text-[var(--color-muted)]">
                   <th className="px-4 py-2.5">Risk</th>

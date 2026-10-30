@@ -104,13 +104,22 @@ export function AppLayout() {
       {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside
         className={`z-50 flex flex-none flex-col bg-[var(--color-nav-bg)] text-white shadow-[3px_0_4px_#e6ced2] transition-all duration-200
-          fixed inset-y-0 left-0 w-[248px] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+          fixed inset-y-0 left-0 w-[min(288px,85vw)] lg:w-[248px] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
           lg:static lg:translate-x-0 ${navCollapsed ? 'lg:w-[76px]' : 'lg:w-[248px] xl:w-[272px]'}`}
       >
+        <button
+          type="button"
+          onClick={() => setMobileOpen(false)}
+          aria-label="Close navigation"
+          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-white/[.12] text-white lg:hidden"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
+        </button>
         <NavLink
           to="/"
           aria-label="EPMP home"
-          className="flex h-[137px] flex-none flex-col items-center justify-center border-b border-white/[.12] px-5"
+          onClick={() => setMobileOpen(false)}
+          className="flex h-[137px] flex-none flex-col items-center justify-center border-b border-white/[.12] px-5 max-[860px]:h-[104px]"
         >
           {navCollapsed ? (
             <span className="text-xl font-bold tracking-wide">EP</span>
@@ -179,10 +188,10 @@ export function AppLayout() {
 
       {/* ── Main column ─────────────────────────────────────────── */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="mx-4 flex min-h-[98px] flex-none flex-wrap items-center gap-3.5 py-3.5 lg:mx-7">
+        <header className="mx-4 flex min-h-[98px] flex-none flex-wrap items-center gap-3.5 py-3.5 lg:mx-7 max-[860px]:mx-0 max-[860px]:min-h-[60px] max-[860px]:flex-nowrap max-[860px]:gap-2.5 max-[860px]:border-b max-[860px]:border-[var(--color-border)] max-[860px]:bg-white/80 max-[860px]:px-4 max-[860px]:py-2.5">
           <button
             type="button"
-            className="flex h-9 w-9 flex-none items-center justify-center lg:hidden"
+            className="flex h-9 w-9 flex-none items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-white lg:hidden"
             onClick={() => setMobileOpen(true)}
             aria-label="Open navigation"
           >
@@ -199,11 +208,14 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main id="main-content" className="flex-1 overflow-y-auto px-4 pb-7 pt-1 lg:px-7">
+        <main id="main-content" className="flex-1 overflow-y-auto px-4 pb-7 pt-1 lg:px-7 max-[860px]:pt-3.5">
           <Outlet context={{ startTour: () => setTourOpen(true) } satisfies AppOutletContext} />
+          <p className="m-only mt-6 text-center text-[11px] leading-5 text-[var(--color-muted)]">
+            QA Activity Tracker · EPMP design language<br />Prototype data · Light mode
+          </p>
         </main>
 
-        <footer className="flex flex-none flex-wrap items-center justify-between gap-2 px-4 pb-4 pt-1 text-[10px] text-[var(--color-muted)] lg:px-7">
+        <footer className="m-hide flex flex-none flex-wrap items-center justify-between gap-2 px-4 pb-4 pt-1 text-[10px] text-[var(--color-muted)] lg:px-7">
           <span>QA Activity Tracker · EPMP design language</span>
           <span>Prototype data · Light mode</span>
         </footer>

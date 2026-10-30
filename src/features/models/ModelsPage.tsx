@@ -376,8 +376,8 @@ export function ModelsPage() {
 
       {/* Models table */}
       <Card flush>
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-xs">
+        <div className="overflow-x-auto m-tbl-wrap">
+          <table className="w-full min-w-[640px] text-xs m-tbl">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                 <th className="px-4 py-3 text-left font-semibold text-[var(--color-text)] min-w-[110px]">

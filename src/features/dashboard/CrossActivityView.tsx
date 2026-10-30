@@ -44,8 +44,8 @@ function CrossWidgetChart({
 
   if (widget.display === 'table') {
     return (
-      <div className="h-full overflow-auto text-[11px]">
-        <table className="w-full text-left">
+      <div className="h-full overflow-auto text-[11px] m-tbl-wrap">
+        <table className="w-full text-left m-tbl">
           <thead>
             <tr className="border-b border-[var(--color-border)] text-[var(--color-muted)]">
               <th className="py-1 font-semibold">Activity · Milestone</th>

@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react'
 import GridLayout, { WidthProvider } from 'react-grid-layout/legacy'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore, getPersonaScope } from '../../store/personaStore'
-import { Card, Button } from '../../components'
+import { Card, Button, MobileFilters, useIsMobile } from '../../components'
 import { WidgetRenderer } from './WidgetRegistry'
 import {
   aggregateWidgetData,
@@ -48,6 +48,7 @@ export function DashboardsPage() {
   const scope = getPersonaScope(currentPersona)
 
   // Selected Dashboard ID: 'overview' or an activity ID
+  const isMobile = useIsMobile()
   const [selectedActivityId, setSelectedActivityId] = useState<string | 'overview'>('overview')
   // When set, a cross-activity dashboard is shown instead of the activity/overview dashboard.
   const [selectedCrossId, setSelectedCrossId] = useState<string | null>(null)
@@ -444,13 +445,124 @@ export function DashboardsPage() {
     }))
   }, [activeDashboard.widgets])
 
+  // Mobile (≤ 860px): widgets stack full width at their own height instead of the 12-column drag grid.
+  const renderWidgets = (mobile: boolean) => activeDashboard.widgets.map((widget) => {
+              // Aggregate real-time filtered metrics
+              const widgetData = aggregateWidgetData(
+                widget,
+                entries,
+                activities,
+                parts,
+                templateRows,
+                modelRecords,
+                effectiveFilters,
+                selectedActivityId,
+                DEMO_TODAY
+              )
+
+              const isActive = activeWidgetId === widget.id
+
+              return (
+                <div
+                  key={widget.id}
+                  className={`bg-white border rounded-lg p-3 overflow-hidden relative group transition-all duration-200 ${
+                    isActive
+                      ? 'ring-2 ring-primary border-transparent shadow-md'
+                      : 'border-[var(--color-border)] shadow-xs'
+                  } ${editMode ? 'hover:border-primary cursor-move' : ''}`}
+                  style={mobile ? { height: widget.grid.h * 70 + (widget.grid.h - 1) * 10 } : undefined}
+                  onClick={() => {
+                    if (editMode) {
+                      setActiveWidgetId(widget.id)
+                    }
+                  }}
+                >
+                  {/* EDIT WIDGET OVERLAY OPTION BOXES */}
+                  {editMode && (
+                    <div className="absolute top-2 right-2 flex gap-1 z-30 opacity-0 group-hover:opacity-100 max-[860px]:opacity-100 transition-opacity bg-white/90 backdrop-blur-xs p-1 rounded border border-border shadow-sm">
+                      <button
+                        title="Configure properties"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setActiveWidgetId(widget.id)
+                        }}
+                        className="p-1 hover:bg-surface text-ink-muted rounded text-xxs"
+                      >
+                        ⚙ Props
+                      </button>
+                      <button
+                        title="Duplicate"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDuplicateWidget(widget)
+                        }}
+                        className="p-1 hover:bg-surface text-ink-muted rounded text-xxs"
+                      >
+                        🗐 Copy
+                      </button>
+                      <button
+                        title="Remove"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRemoveWidget(widget.id)
+                        }}
+                        className="p-1 hover:bg-[#fef2f2] text-destructive rounded text-xxs"
+                      >
+                        ✖ Del
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Render Widget */}
+                  <WidgetRenderer
+                    widget={widget}
+                    data={widgetData}
+                    activityId={selectedActivityId}
+                    onDrillDown={handleDrillDown}
+                  />
+                </div>
+              )
+            })
+
   return (
-    <div className="max-w-7xl mx-auto flex gap-5 relative">
+    <div className="max-w-7xl mx-auto flex gap-5 relative max-[860px]:flex-col max-[860px]:gap-3">
       {/* LEFT NAVIGATION sidebar to toggle dashboards */}
-      <div className="w-64 flex-shrink-0 epmp-card p-4 h-[fit-content]">
+      <div className="w-64 flex-shrink-0 epmp-card p-4 h-[fit-content] max-[860px]:w-full">
         <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-muted)] mb-3 px-1">
           Select Dashboard
         </h3>
+        {isMobile ? (
+          <div className="flex items-center gap-2">
+            <select
+              aria-label="Select dashboard"
+              value={selectedCross ? `x:${selectedCross.id}` : selectedActivityId === 'overview' ? 'overview' : `a:${selectedActivityId}`}
+              onChange={(e) => {
+                const v = e.target.value
+                if (v.startsWith('x:')) { setSelectedCrossId(v.slice(2)); setActiveWidgetId(null); return }
+                setSelectedActivityId(v === 'overview' ? 'overview' : v.slice(2))
+                setSelectedCrossId(null)
+                setSelectedViewId('default')
+                setActiveWidgetId(null)
+                setFilters(filtersForNewDashboard)
+              }}
+              className="min-w-0 flex-1 rounded-lg border border-[var(--color-border)] bg-white px-3 text-[var(--color-text)]"
+            >
+              <option value="overview">📊 Global Milestone Overview</option>
+              <optgroup label="Activities">
+                {visibleActivities.map((act) => <option key={act.id} value={`a:${act.id}`}>{act.name}</option>)}
+              </optgroup>
+              {crossDashboards.length > 0 && (
+                <optgroup label="Cross-activity">
+                  {crossDashboards.map((d) => <option key={d.id} value={`x:${d.id}`}>🔀 {d.name}</option>)}
+                </optgroup>
+              )}
+            </select>
+            {canEdit && (
+              <button onClick={() => setCrossCreatorOpen(true)} title="New cross-activity dashboard"
+                className="h-10 flex-none rounded-[10px] border border-[#bfdbfe] bg-[var(--color-secondary)] px-3 text-[13px] font-semibold text-[var(--color-primary)]">+ New</button>
+            )}
+          </div>
+        ) : (
         <nav className="flex flex-col gap-1">
           <button
             onClick={() => {
@@ -531,6 +643,7 @@ export function DashboardsPage() {
             ))
           )}
         </nav>
+        )}
       </div>
 
       {/* DASHBOARD BODY */}
@@ -539,7 +652,7 @@ export function DashboardsPage() {
           <CrossActivityView dashboard={selectedCross} />
         ) : clientDashboardHref ? (
           /* Pixel-perfect client dashboard embedded as-is (runs on its own demo data). */
-          <div className="epmp-card overflow-hidden" style={{ height: 'calc(100vh - 150px)' }}>
+          <div className="epmp-card overflow-hidden" style={{ height: isMobile ? 'calc(100vh - 120px)' : 'calc(100vh - 150px)' }}>
             <div className="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-4 py-2.5">
               <div>
                 <h2 className="m-0 text-[15px] font-semibold leading-5 text-[var(--color-text)]">{activity?.name ?? 'Activity dashboard'}</h2>
@@ -566,7 +679,7 @@ export function DashboardsPage() {
         <>
         {/* TOP TOOLBAR: View details + Actions */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-4 epmp-card px-4 py-3">
-          <div>
+          <div className="min-w-0">
             <h2 className="m-0 text-[20px] font-semibold leading-7 tracking-[-0.3px] text-[var(--color-text)]">
               {selectedActivityId === 'overview' ? 'Global Milestone Overview Dashboard' : 'Activity Performance Dashboard'}
             </h2>
@@ -577,7 +690,7 @@ export function DashboardsPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 max-[860px]:w-full max-[860px]:flex-wrap">
             {/* View Selector (Named views) */}
             <select
               value={selectedViewId}
@@ -633,6 +746,7 @@ export function DashboardsPage() {
             </button>
           </div>
 
+          <MobileFilters count={Object.entries(filters).filter(([, v]) => Array.isArray(v) ? v.length > 0 : !!v && v !== 'All').length} onClear={() => setFilters(EMPTY_FILTERS)}>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-2.5">
             {/* Milestone */}
             <div>
@@ -740,6 +854,7 @@ export function DashboardsPage() {
               />
             </div>
           </div>
+          </MobileFilters>
         </div>
 
         {/* ACTIVE FILTER CHIPS: set by dropdowns or by clicking a chart */}
@@ -776,7 +891,7 @@ export function DashboardsPage() {
         {/* CUSTOMIZATION CONTROLS BAR (Only visible in Edit Mode) */}
         {editMode && (
           <div className="bg-secondary border border-[#bfdbfe] rounded-lg p-3.5 mb-4 flex flex-wrap items-center justify-between gap-3 animate-fade-in text-xs">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 max-[860px]:flex-wrap">
               <span className="font-bold text-primary">🛠 Configurator Toolbox:</span>
               <button
                 onClick={() => handleAddWidget('chart')}
@@ -845,6 +960,9 @@ export function DashboardsPage() {
           </Card>
         ) : (
           <div data-tour="dashboard-grid">
+          {isMobile ? (
+            <div className="flex flex-col gap-3">{renderWidgets(true)}</div>
+          ) : (
           <ReactGridLayout
             className="layout"
             layout={rglLayout}
@@ -855,83 +973,9 @@ export function DashboardsPage() {
             onLayoutChange={handleLayoutChange}
             draggableCancel=".recharts-wrapper, select, input, button"
           >
-            {activeDashboard.widgets.map((widget) => {
-              // Aggregate real-time filtered metrics
-              const widgetData = aggregateWidgetData(
-                widget,
-                entries,
-                activities,
-                parts,
-                templateRows,
-                modelRecords,
-                effectiveFilters,
-                selectedActivityId,
-                DEMO_TODAY
-              )
-
-              const isActive = activeWidgetId === widget.id
-
-              return (
-                <div
-                  key={widget.id}
-                  className={`bg-white border rounded-lg p-3 overflow-hidden relative group transition-all duration-200 ${
-                    isActive
-                      ? 'ring-2 ring-primary border-transparent shadow-md'
-                      : 'border-[var(--color-border)] shadow-xs'
-                  } ${editMode ? 'hover:border-primary cursor-move' : ''}`}
-                  onClick={() => {
-                    if (editMode) {
-                      setActiveWidgetId(widget.id)
-                    }
-                  }}
-                >
-                  {/* EDIT WIDGET OVERLAY OPTION BOXES */}
-                  {editMode && (
-                    <div className="absolute top-2 right-2 flex gap-1 z-30 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-xs p-1 rounded border border-border shadow-sm">
-                      <button
-                        title="Configure properties"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setActiveWidgetId(widget.id)
-                        }}
-                        className="p-1 hover:bg-surface text-ink-muted rounded text-xxs"
-                      >
-                        ⚙ Props
-                      </button>
-                      <button
-                        title="Duplicate"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleDuplicateWidget(widget)
-                        }}
-                        className="p-1 hover:bg-surface text-ink-muted rounded text-xxs"
-                      >
-                        🗐 Copy
-                      </button>
-                      <button
-                        title="Remove"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleRemoveWidget(widget.id)
-                        }}
-                        className="p-1 hover:bg-[#fef2f2] text-destructive rounded text-xxs"
-                      >
-                        ✖ Del
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Render Widget */}
-                  <WidgetRenderer
-                    widget={widget}
-                    data={widgetData}
-                    activityId={selectedActivityId}
-                    onDrillDown={handleDrillDown}
-                  />
-                </div>
-              )
-            })}
+            {renderWidgets(false)}
           </ReactGridLayout>
+          )}
           </div>
         )}
         </>
@@ -940,7 +984,7 @@ export function DashboardsPage() {
 
       {/* PROPERTIES DRAWER PANEL (Right-side) */}
       {editMode && activeWidget && (
-        <div className="w-80 flex-shrink-0 epmp-card p-4 h-[fit-content] animate-slide-in sticky top-5 z-20">
+        <div className="w-80 flex-shrink-0 epmp-card p-4 h-[fit-content] animate-slide-in sticky top-5 z-20 max-[860px]:fixed max-[860px]:inset-x-0 max-[860px]:bottom-0 max-[860px]:top-auto max-[860px]:z-[190] max-[860px]:max-h-[80vh] max-[860px]:w-full max-[860px]:overflow-y-auto max-[860px]:rounded-b-none max-[860px]:rounded-t-[20px] max-[860px]:shadow-[0_-10px_40px_rgba(2,6,23,.18)]">
           <div className="flex items-center justify-between border-b border-border pb-2 mb-3">
             <h3 className="text-xs font-bold uppercase tracking-wider text-[var(--color-text)]">
               Widget Properties

@@ -140,10 +140,10 @@ export function BuilderWizard() {
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0" data-tour="builder-wizard">
+    <div className="flex flex-col h-full min-h-0 max-[860px]:h-auto" data-tour="builder-wizard">
       {/* Wizard header */}
-      <div className="flex items-center justify-between mb-4 flex-shrink-0">
-        <div>
+      <div className="flex items-center justify-between mb-4 flex-shrink-0 gap-3">
+        <div className="min-w-0">
           <button
             onClick={() => navigate('/activities')}
             className="text-[11px] text-[#596579] hover:underline flex items-center gap-1 mb-1"
@@ -162,7 +162,7 @@ export function BuilderWizard() {
       </div>
 
       {/* Step tabs */}
-      <div className="epmp-card flex flex-wrap items-center gap-1 mb-5 p-1.5 flex-shrink-0">
+      <div className="epmp-card flex flex-wrap items-center gap-1 mb-5 p-1.5 flex-shrink-0 max-[860px]:flex-nowrap max-[860px]:overflow-x-auto max-[860px]:[scrollbar-width:none]">
         {STEPS.map((step, i) => {
           const isActive = step.id === currentStep
           const isDone = STEPS.findIndex((s) => s.id === currentStep) > i
@@ -170,7 +170,7 @@ export function BuilderWizard() {
             <button
               key={step.id}
               onClick={() => setCurrentStep(step.id)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus:outline-none ${
+              className={`flex items-center gap-2 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors max-[860px]:flex-none max-[860px]:whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus:outline-none ${
                 isActive
                   ? 'border-[#bfdbfe] bg-secondary text-[var(--color-accent)]'
                   : isDone
@@ -196,9 +196,9 @@ export function BuilderWizard() {
       </div>
 
       {/* Main content: step + preview */}
-      <div className="flex gap-5 flex-1 min-h-0">
+      <div className="flex gap-5 flex-1 min-h-0 max-[860px]:flex-col max-[860px]:flex-none">
         {/* Step content */}
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto max-[860px]:overflow-visible max-[860px]:min-w-0 max-[860px]:flex-none">
           <div className="pb-8">
             {currentStep === 'basics' && (
               <BasicsStep draft={draft} onChange={updateDraft} />
@@ -219,22 +219,23 @@ export function BuilderWizard() {
         </div>
 
         {/* Live preview panel */}
-        <div className="w-72 flex-shrink-0 h-full min-h-0 sticky top-0">
+        <div className="w-72 flex-shrink-0 h-full min-h-0 sticky top-0 max-[860px]:static max-[860px]:h-auto max-[860px]:w-full">
           <LivePreviewPanel draft={draft} />
         </div>
       </div>
 
       {/* Bottom navigation */}
-      <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--color-border)] flex-shrink-0">
+      <div className="flex items-center justify-between pt-4 mt-4 border-t border-[var(--color-border)] flex-shrink-0 gap-2 max-[860px]:sticky max-[860px]:bottom-0 max-[860px]:z-20 max-[860px]:-mx-4 max-[860px]:bg-white max-[860px]:px-4 max-[860px]:pb-3 max-[860px]:pt-3 max-[860px]:shadow-[0_-4px_12px_rgba(2,6,23,.06)]">
         <Button
           variant="secondary"
           size="md"
+          className="flex-none whitespace-nowrap"
           onClick={goBack}
           disabled={stepIdx === 0}
         >
           ← Previous
         </Button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 max-[860px]:min-w-0 max-[860px]:flex-wrap max-[860px]:justify-end">
           {hasErrors && currentStep === 'review' && (
             <span className="text-xs text-destructive">
               {validationMessages.filter((m) => m.severity === 'error').length} error(s) must be fixed

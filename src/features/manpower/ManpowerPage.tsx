@@ -73,8 +73,8 @@ export function ManpowerPage() {
 
       {tab === 'load' && (
         <Card flush>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto m-tbl-wrap">
+            <table className="w-full text-sm m-tbl">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                   <th className={thCls}>PIC</th>

@@ -3,7 +3,7 @@ import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import { calculateRYG, resolveInstanceDates, resolveTrackedDates, completionPct, getMilestoneMrd, isWorkableByVendor } from '../../engine'
-import { Button, Card, RygDot, StatusPill, ApplicabilityDialog } from '../../components'
+import { Button, Card, RygDot, StatusPill, ApplicabilityDialog, useMobilePage, MobileFilters } from '../../components'
 import type { RygStatus } from '../../components/RygDot'
 import type { StatusValue } from '../../components/StatusPill'
 import type { PartRecord } from '../../domain'
@@ -228,6 +228,7 @@ export function WorkspacePage() {
     [applicableParts, entryMap]
   )
 
+  const pgParts = useMobilePage(filteredParts, 10, 'parts')
   if (!row || !activity) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-[var(--color-muted)]">
@@ -357,8 +358,8 @@ export function WorkspacePage() {
           </div>
 
           {/* RYG Summary + Completion */}
-          <div className="flex items-center gap-6 flex-shrink-0">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center gap-6 flex-shrink-0 max-[860px]:w-full max-[860px]:flex-shrink max-[860px]:justify-between max-[860px]:gap-3 max-[860px]:flex-wrap">
+            <div className="flex items-center gap-3 max-[860px]:flex-wrap max-[860px]:gap-2">
               <div className="flex items-center gap-1">
                 <RygDot status="green" size={10} />
                 <span className="text-sm text-[var(--color-muted)]">{rygSummary.green}</span>
@@ -398,6 +399,10 @@ export function WorkspacePage() {
 
       {/* Filters row */}
       <div className="flex flex-wrap gap-2 mb-3 items-center">
+        <MobileFilters
+          count={[modelFilter, vendorFilter, typeFilter, statusFilter, rygFilter, applicabilityFilter].filter((v) => v !== 'All').length}
+          onClear={() => setSearchParams(new URLSearchParams())}
+        >
         <select
           value={modelFilter}
           onChange={(e) => setModelFilter(e.target.value)}
@@ -471,6 +476,7 @@ export function WorkspacePage() {
             Clear filters
           </button>
         )}
+        </MobileFilters>
         <span className="ml-auto text-xs text-[var(--color-muted)]">
           {filteredParts.length} of {applicableParts.length} parts
         </span>
@@ -523,8 +529,8 @@ export function WorkspacePage() {
             <p className="font-medium">No parts match your filters</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto m-tbl-wrap">
+            <table className="w-full text-sm m-tbl m-tbl2">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                   <th className="px-3 py-3 w-8">
@@ -552,7 +558,7 @@ export function WorkspacePage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredParts.map((part, i) => {
+                {pgParts.rows.map((part, i) => {
                   const status = getEntryStatus(part.partNo)
                   const ryg = getRygForPart(part.partNo)
                   const isSelected = selected.has(part.partNo)
@@ -646,6 +652,7 @@ export function WorkspacePage() {
                 })}
               </tbody>
             </table>
+            {pgParts.pager && <div className="sticky left-0 px-4 pb-3">{pgParts.pager}</div>}
           </div>
         )}
       </Card>

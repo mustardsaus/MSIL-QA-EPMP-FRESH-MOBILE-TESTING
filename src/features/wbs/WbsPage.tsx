@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Card } from '../../components'
+import { PageHeader, Card, useMobilePage } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { getFilteredData } from '../../engine'
 import type { FilteredInstance, InstanceStatus } from '../../engine'
@@ -139,6 +139,8 @@ export function WbsPage() {
       return next
     })
 
+  const pg = useMobilePage(flat, 15, 'rows')
+
   const kindTag: Record<NodeKind, string> = {
     milestone: 'bg-indigo-100 text-indigo-700',
     part: 'bg-sky-100 text-sky-700',
@@ -179,8 +181,8 @@ export function WbsPage() {
         <Card><p className="py-10 text-center text-sm text-[var(--color-muted)]">No activities for this model yet.</p></Card>
       ) : (
         <Card flush>
-          <div className="overflow-x-auto">
-            <table className="w-full text-[12px]">
+          <div className="overflow-x-auto m-tbl-wrap">
+            <table className="w-full text-[12px] m-tbl m-key2">
               <thead>
                 <tr className="border-b border-[var(--color-border)] bg-[#dce8fb] text-left text-[11px] font-medium text-[#344054]">
                   <th className="px-4 py-3 min-w-[110px]">WBS ID</th>
@@ -194,7 +196,7 @@ export function WbsPage() {
                 </tr>
               </thead>
               <tbody>
-                {flat.map((n) => {
+                {pg.rows.map((n) => {
                   const hasKids = !!n.children?.length
                   const isOpen = !collapsed.has(n.id)
                   return (
@@ -203,7 +205,7 @@ export function WbsPage() {
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2" style={{ paddingLeft: `${n.depth * 20}px` }}>
                           {hasKids ? (
-                            <button onClick={() => toggle(n.id)} className="flex h-4 w-4 flex-none items-center justify-center text-[var(--color-muted)]">
+                            <button onClick={() => toggle(n.id)} aria-label={isOpen ? 'Collapse' : 'Expand'} className="flex h-4 w-4 max-[860px]:h-7 max-[860px]:w-7 flex-none items-center justify-center text-[var(--color-muted)]">
                               <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.5" style={{ transform: isOpen ? 'rotate(90deg)' : 'none' }}><path d="M3.5 2.5 6.5 5 3.5 7.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
                             </button>
                           ) : <span className="h-4 w-4 flex-none" />}
@@ -229,6 +231,7 @@ export function WbsPage() {
               </tbody>
             </table>
           </div>
+          {pg.pager && <div className="px-4 pb-3">{pg.pager}</div>}
         </Card>
       )}
     </div>

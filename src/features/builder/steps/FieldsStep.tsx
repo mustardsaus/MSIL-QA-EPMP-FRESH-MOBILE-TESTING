@@ -469,7 +469,7 @@ function FieldExpandedOptions({ field, onUpdate, optionsRaw, onOptionsChange, al
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4 text-xs">
+    <div className="grid grid-cols-3 gap-4 text-xs max-[860px]:grid-cols-1">
       {/* Column 1: Options / Fetched attribute */}
       <div className="space-y-2">
         {needsOptions && !isFetched && (

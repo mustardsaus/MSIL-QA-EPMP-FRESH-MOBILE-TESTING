@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 // production build needs a matching `base`. The base is read from the VITE_BASE env
 // var (the Pages workflow sets it to '/<repo>/') and defaults to the repo name, so
 // nothing is hard-coded. The hash router means in-app routing works under any base.
-const repoBase = process.env.VITE_BASE ?? '/MSIL-QA-EPMP-Fresh/'
+const repoBase = process.env.VITE_BASE ?? './'
 
 export default defineConfig(({ command }) => ({
   // Only the production build needs the subpath; the dev server stays at '/'.

@@ -37,9 +37,9 @@ jobs:
         run: npm ci
 
       - name: Build
-        # VITE_BASE must match the repo name so assets resolve under /<repo>/.
+        # Relative base: works under any repo name (the app uses hash routing).
         env:
-          VITE_BASE: /MSIL-QA-EPMP-Fresh/
+          VITE_BASE: ./
         run: npm run build
 
       - name: Upload Pages artifact

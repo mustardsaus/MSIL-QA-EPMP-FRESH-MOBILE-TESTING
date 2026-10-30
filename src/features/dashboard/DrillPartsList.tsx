@@ -50,8 +50,8 @@ export function DrillPartsList({ instances, activity }: DrillPartsListProps) {
       {instances.length === 0 ? (
         <p className="px-4 py-6 text-center text-xs text-[var(--color-muted)]">No parts match these filters.</p>
       ) : (
-        <div className="overflow-x-auto max-h-96 overflow-y-auto">
-          <table className="w-full text-xs">
+        <div className="overflow-x-auto max-h-96 overflow-y-auto m-tbl-wrap">
+          <table className="w-full text-xs m-tbl">
             <thead className="sticky top-0 bg-[var(--color-surface)]">
               <tr className="border-b border-[var(--color-border)]">
                 <th className={th}>Part No.</th>

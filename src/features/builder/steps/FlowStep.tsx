@@ -149,7 +149,7 @@ export function FlowStep({ draft, onChange }: FlowStepProps) {
       {/* Templates */}
       <div>
         <div className="text-sm font-semibold text-[var(--color-text)] mb-2">Quick-start templates</div>
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-3 gap-3 max-[860px]:grid-cols-1">
           {TEMPLATES.map((tmpl) => (
             <button
               key={tmpl.id}

@@ -3,6 +3,7 @@ import { PageHeader } from '../../components/PageHeader'
 import { Card } from '../../components/Card'
 import { Button } from '../../components/Button'
 import { Modal } from '../../components/Modal'
+import { useMobilePage } from '../../components/Mobile'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore, getPersonaScope, FIXED_SECTION } from '../../store/personaStore'
 import type { PersonaId } from '../../store/personaStore'
@@ -214,6 +215,7 @@ interface PreviewTableProps {
 function PreviewTable({ rows, activities, milestones, models, selectedModel, onModelChange }: PreviewTableProps) {
   const model = models.find((m) => m.name === selectedModel)
 
+  const pgRows = useMobilePage(rows, 10, 'rows')
   return (
     <Card title="Live preview" actions={
       <select
@@ -230,8 +232,8 @@ function PreviewTable({ rows, activities, milestones, models, selectedModel, onM
       {rows.length === 0 ? (
         <p className="py-4 text-xs text-[var(--color-muted)]">Add template rows to see the preview.</p>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[480px] text-xs">
+        <div className="overflow-x-auto m-tbl-wrap">
+          <table className="w-full min-w-[480px] text-xs m-tbl">
             <thead>
               <tr className="border-b border-[var(--color-border)]">
                 <th className="pb-2 text-left font-medium text-[var(--color-muted)]">Activity</th>
@@ -242,7 +244,7 @@ function PreviewTable({ rows, activities, milestones, models, selectedModel, onM
               </tr>
             </thead>
             <tbody>
-              {rows.map((row) => {
+              {pgRows.rows.map((row) => {
                 const activity = activities.find((a) => a.id === row.activityId)
                 const milestone = milestones.find((m) => m.id === row.milestoneId)
                 const dates = resolveInstanceDates(row, model)
@@ -270,6 +272,7 @@ function PreviewTable({ rows, activities, milestones, models, selectedModel, onM
               })}
             </tbody>
           </table>
+          {pgRows.pager && <div className="sticky left-0 px-4 pb-3">{pgRows.pager}</div>}
         </div>
       )}
     </Card>
@@ -411,6 +414,7 @@ export function SectionTemplatePage() {
       }
     : { activityId: '', milestoneId: '', startOffset: 0, endOffset: 0 }
 
+  const pgSec = useMobilePage(sectionRows, 10, 'rows')
   return (
     <div>
       <PageHeader
@@ -457,8 +461,8 @@ export function SectionTemplatePage() {
 
       {/* Template rows table */}
       <Card flush className="mb-5">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px] text-xs">
+        <div className="overflow-x-auto m-tbl-wrap">
+          <table className="w-full min-w-[600px] text-xs m-tbl">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                 <th className="px-4 py-3 text-left font-semibold text-[var(--color-text)]">Activity</th>
@@ -482,7 +486,7 @@ export function SectionTemplatePage() {
                   </td>
                 </tr>
               )}
-              {sectionRows.map((row) => {
+              {pgSec.rows.map((row) => {
                 const activity = activities.find((a) => a.id === row.activityId)
                 const milestone = milestones.find((m) => m.id === row.milestoneId)
                 return (
@@ -532,6 +536,7 @@ export function SectionTemplatePage() {
             </tbody>
           </table>
         </div>
+        {pgSec.pager && <div className="px-4 pb-3">{pgSec.pager}</div>}
       </Card>
 
       {/* Live preview */}

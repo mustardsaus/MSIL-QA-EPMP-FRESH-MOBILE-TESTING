@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react'
 import { Link, useParams, useSearchParams } from 'react-router-dom'
-import { PageHeader, Card, Button, StatusPill, RygDot, Modal } from '../../components'
+import { PageHeader, Card, Button, StatusPill, RygDot, Modal, MobileFilters, useMobilePage } from '../../components'
 import type { StatusValue } from '../../components/StatusPill'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
@@ -118,6 +118,8 @@ export function MyWorkGridPage() {
           : !roleEntersFirst(activity, role)
             ? `${activity.name} is not entered by the ${role}, so there is no entry grid for it. Open the validation grid to review submissions.`
             : null
+
+  const pgGrid = useMobilePage(shown, 15, 'parts')
 
   if (gate || !activity) {
     return (
@@ -359,7 +361,11 @@ export function MyWorkGridPage() {
         {sentBackTotal > 0 && <span className="font-medium text-[var(--color-ryg-red)]">{sentBackTotal} sent back</span>}
         <span>{readyRows.length} ready to {validating ? 'approve' : 'submit'}</span>
         <span>{unsavedRows.length} with unsaved edits</span>
-        <span className="ml-auto flex items-center gap-3">
+        <span className="ml-auto flex items-center gap-3 max-[860px]:ml-0 max-[860px]:w-full">
+          <MobileFilters
+            count={[sectionFilter, modelFilter, vendorFilter].filter((v) => v !== 'All').length + (hideLocked ? 1 : 0)}
+            onClear={() => { setSectionFilter('All'); setModelFilter('All'); setVendorFilter('All'); setHideLocked(false) }}
+          >
           <label className="flex items-center gap-1.5">
             Section
             <select
@@ -409,6 +415,7 @@ export function MyWorkGridPage() {
             <input type="checkbox" checked={hideLocked} onChange={(e) => setHideLocked(e.target.checked)} />
             Hide locked rows
           </label>
+          </MobileFilters>
         </span>
       </div>
 
@@ -570,7 +577,7 @@ export function MyWorkGridPage() {
                 </td>
               </tr>
             )}
-            {shown.map((m, idx) => {
+            {pgGrid.rows.map((m, idx) => {
               const inst = m.inst
               const locked = !!m.lock
               const rowTone = locked ? 'bg-[var(--color-surface)] text-[var(--color-muted)]' : m.dirty ? 'bg-[#f8fbff]' : 'bg-white'
@@ -708,6 +715,7 @@ export function MyWorkGridPage() {
             })}
           </tbody>
         </table>
+        {pgGrid.pager && <div className="sticky left-0 px-4 pb-3">{pgGrid.pager}</div>}
       </div>
 
       <p className="mt-2 text-[11px] text-[var(--color-muted)]">

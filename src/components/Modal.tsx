@@ -32,11 +32,11 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-[rgba(2,6,23,.5)] p-5"
+      className="m-modal-overlay fixed inset-0 z-[200] flex items-center justify-center bg-[rgba(2,6,23,.5)] p-5"
       onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
     >
       <div
-        className={`w-full ${sizeClasses[size]} rounded-xl bg-white shadow-[0_20px_60px_rgba(2,6,23,.35)] flex flex-col max-h-[90vh]`}
+        className={`m-modal w-full ${sizeClasses[size]} rounded-xl bg-white shadow-[0_20px_60px_rgba(2,6,23,.35)] flex flex-col max-h-[90vh]`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
@@ -48,7 +48,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
             </h2>
             <button
               onClick={onClose}
-              className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#bfdbfe]"
+              className="flex h-7 w-7 max-[860px]:h-9 max-[860px]:w-9 items-center justify-center rounded-lg text-[var(--color-muted)] hover:bg-[var(--color-surface)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#bfdbfe]"
               aria-label="Close"
             >
               ✕
@@ -57,7 +57,7 @@ export function Modal({ open, onClose, title, children, footer, size = 'md' }: M
         )}
         <div className="overflow-y-auto p-5 flex-1">{children}</div>
         {footer && (
-          <div className="border-t border-[var(--color-border)] px-5 py-3 flex justify-end gap-2">
+          <div className="m-modal-foot border-t border-[var(--color-border)] px-5 py-3 flex justify-end gap-2">
             {footer}
           </div>
         )}

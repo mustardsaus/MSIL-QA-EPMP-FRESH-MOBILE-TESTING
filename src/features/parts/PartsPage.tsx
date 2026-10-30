@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Card, Button, Modal, Tabs } from '../../components'
+import { PageHeader, Card, Button, Modal, Tabs, useMobilePage } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import { getPicOn, buildActivityLog, getReleaseState, latestReturn, vendorLocation } from '../../engine'
@@ -224,6 +224,8 @@ export function PartsPage() {
 
   const supersededCount = scopeParts.filter((p) => p.supersededBy).length
 
+  const pgParts = useMobilePage(visibleParts, 10, 'parts')
+  const pgLog = useMobilePage(filteredLog, 10, 'entries')
   return (
     <div>
       <PageHeader
@@ -261,8 +263,8 @@ export function PartsPage() {
           </section>
 
           <Card flush>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>Part</th>
@@ -277,7 +279,7 @@ export function PartsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {visibleParts.map((p) => {
+                  {pgParts.rows.map((p) => {
                     const superseded = !!p.supersededBy
                     const rstate = getReleaseState(p.partNo, partReleases, partAcks)
                     const withVendor = rstate === 'Released' || rstate === 'Acknowledged'
@@ -376,6 +378,7 @@ export function PartsPage() {
                 </tbody>
               </table>
             </div>
+            {pgParts.pager && <div className="px-4 pb-3">{pgParts.pager}</div>}
           </Card>
         </>
       )}
@@ -383,8 +386,8 @@ export function PartsPage() {
       {tab === 'audit' && (
         <>
           <Card flush className="mb-4">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>PIC / Person</th>
@@ -449,8 +452,8 @@ export function PartsPage() {
           </section>
 
           <Card flush>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>When</th>
@@ -462,7 +465,7 @@ export function PartsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredLog.map((l, i) => (
+                  {pgLog.rows.map((l, i) => (
                     <tr key={`${l.templateRowId}-${l.timestamp}-${i}`} className="border-b border-[var(--color-border)] last:border-0">
                       <td className="px-4 py-3 whitespace-nowrap text-[12px] text-[var(--color-muted)]">{fmtDateTime(l.timestamp)}</td>
                       <td className="px-4 py-3 font-medium text-[#101828]">{l.person}</td>
@@ -493,6 +496,7 @@ export function PartsPage() {
                 </tbody>
               </table>
             </div>
+            {pgLog.pager && <div className="px-4 pb-3">{pgLog.pager}</div>}
           </Card>
 
           {partEvents.length > 0 && (

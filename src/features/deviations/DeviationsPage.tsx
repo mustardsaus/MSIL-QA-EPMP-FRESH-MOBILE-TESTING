@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Card, Button, Modal } from '../../components'
+import { PageHeader, Card, Button, Modal, useMobilePage } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import type { Deviation, DeviationStatus } from '../../domain'
@@ -98,6 +98,7 @@ export function DeviationsPage() {
     setComment('')
   }
 
+  const pgDev = useMobilePage(filtered, 10, 'deviations')
   return (
     <div>
       <PageHeader
@@ -125,8 +126,8 @@ export function DeviationsPage() {
       </section>
 
       <Card flush>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto m-tbl-wrap">
+          <table className="w-full text-sm m-tbl">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                 <th className={thCls}>Deviation</th>
@@ -141,7 +142,7 @@ export function DeviationsPage() {
               </tr>
             </thead>
             <tbody>
-              {filtered.map((r) => {
+              {pgDev.rows.map((r) => {
                 const d = r.dev
                 return (
                   <tr key={d.id} className="border-b border-[var(--color-border)] last:border-0 align-top hover:bg-secondary/40">
@@ -202,6 +203,7 @@ export function DeviationsPage() {
             </tbody>
           </table>
         </div>
+        {pgDev.pager && <div className="px-4 pb-3">{pgDev.pager}</div>}
       </Card>
 
       <Modal

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Card, Button, Modal, Tabs } from '../../components'
+import { PageHeader, Card, Button, Modal, Tabs, useMobilePage } from '../../components'
 import { useQAStore } from '../../store/qaStore'
 import { usePersonaStore } from '../../store/personaStore'
 import { getPicOn, buildActivityLog } from '../../engine'
@@ -116,6 +116,8 @@ export function PicsPage() {
 
   const unassignedCount = parts.filter((p) => !getPicOn(p, picAssignments, DEMO_TODAY).name).length
 
+  const pgRows = useMobilePage(rows, 10, 'parts')
+  const pgLog = useMobilePage(filteredLog, 10, 'entries')
   return (
     <div>
       <PageHeader
@@ -155,8 +157,8 @@ export function PicsPage() {
           </section>
 
           <Card flush>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>Part</th>
@@ -168,7 +170,7 @@ export function PicsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map(({ part, current }) => (
+                  {pgRows.rows.map(({ part, current }) => (
                     <tr key={part.partNo} className="border-b border-[var(--color-border)] hover:bg-secondary/50">
                       <td className="px-4 py-3">
                         <div className="font-medium text-[var(--color-text)]">{part.partName}</div>
@@ -208,6 +210,7 @@ export function PicsPage() {
                 </tbody>
               </table>
             </div>
+            {pgRows.pager && <div className="px-4 pb-3">{pgRows.pager}</div>}
           </Card>
         </>
       )}
@@ -215,8 +218,8 @@ export function PicsPage() {
       {tab === 'report' && (
         <>
           <Card title="Actions by person" flush className="mb-4">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>Person</th>
@@ -264,8 +267,8 @@ export function PicsPage() {
           </section>
 
           <Card flush>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="overflow-x-auto m-tbl-wrap">
+              <table className="w-full text-sm m-tbl">
                 <thead>
                   <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
                     <th className={thCls}>When</th>
@@ -277,7 +280,7 @@ export function PicsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredLog.map((l, i) => (
+                  {pgLog.rows.map((l, i) => (
                     <tr key={`${l.templateRowId}-${l.partNo}-${l.timestamp}-${i}`} className="border-b border-[var(--color-border)]">
                       <td className="px-4 py-2.5 whitespace-nowrap text-[var(--color-muted)]">{fmtDateTime(l.timestamp)}</td>
                       <td className="px-4 py-2.5 font-medium">{l.person}</td>
@@ -304,6 +307,7 @@ export function PicsPage() {
                 </tbody>
               </table>
             </div>
+            {pgLog.pager && <div className="px-4 pb-3">{pgLog.pager}</div>}
           </Card>
         </>
       )}
