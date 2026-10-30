@@ -38,9 +38,8 @@ jobs:
 
       - name: Build
         # VITE_BASE must match the repo name so assets resolve under /<repo>/.
-        # github.event.repository.name is the repo this workflow runs in.
         env:
-          VITE_BASE: /${{ github.event.repository.name }}/
+          VITE_BASE: /MSIL-QA-EPMP-Fresh/
         run: npm run build
 
       - name: Upload Pages artifact
